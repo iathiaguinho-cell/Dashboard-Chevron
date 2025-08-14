@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,29 +8,14 @@
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #eef2f7;
-    }
-    .status-column {
-      background: #e2e8f0;
-      border-radius: 12px;
-      min-height: 70vh;
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f7; }
+    .status-column { background: #e2e8f0; border-radius: 12px; min-height: 70vh; }
     .vehicle-card {
-      background: white;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
+      background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      cursor: grab;
-      transition: all 0.2s ease-in-out;
-      border-left: 5px solid #3b82f6;
+      cursor: grab; transition: all 0.2s ease-in-out; border-left: 5px solid #3b82f6;
     }
-    .vehicle-card:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
-    }
+    .vehicle-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1); }
     .vehicle-card.status-Aguardando-Mecanico { border-left-color: #f59e0b; }
     .vehicle-card.status-Em-Analise { border-left-color: #8b5cf6; }
     .vehicle-card.status-Orcamento-Enviado { border-left-color: #06b6d4; }
@@ -39,30 +24,18 @@
     .vehicle-card.status-Em-Execucao { border-left-color: #ef4444; }
     .vehicle-card.status-Finalizado-Aguardando-Retirada { border-left-color: #f97316; }
     .vehicle-card.status-Entregue { border-left-color: #6b7280; opacity: 0.8; }
-
     .modal { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
     .modal-content { background: white; border-radius: 16px; max-height: 90vh; }
     .btn { transition: all 0.2s ease; border-radius: 8px; font-weight: 600; }
     .btn:hover { transform: translateY(-2px); }
-    
-    /* Timeline styles */
     .timeline { border-left: 2px solid #e5e7eb; }
     .timeline-item { position: relative; padding-left: 2rem; }
     .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -0.5rem;
-      top: 0.25rem;
-      width: 0.875rem;
-      height: 0.875rem;
-      border-radius: 9999px;
-      background-color: white;
-      border: 2px solid #9ca3af;
+      content: ''; position: absolute; left: -0.5rem; top: 0.25rem; width: 0.875rem; height: 0.875rem;
+      border-radius: 9999px; background-color: white; border: 2px solid #9ca3af;
     }
     .timeline-item-log::before { border-color: #3b82f6; }
     .timeline-item-status::before { border-color: #10b981; }
-    .timeline-item-budget::before { border-color: #f59e0b; }
-
     .notification {
       position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 1rem 1.5rem;
       border-radius: 0.75rem; color: white; font-weight: 600;
@@ -75,7 +48,6 @@
 </head>
 <body class="bg-gray-100">
 
-  <!-- Tela de Login -->
   <div id="userScreen" class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
       <h1 class="text-3xl font-bold text-gray-800 mb-2">🛠️ Gestão de Pátio</h1>
@@ -84,7 +56,6 @@
     </div>
   </div>
 
-  <!-- App Principal -->
   <div id="app" class="hidden">
     <header class="bg-white shadow-md">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
@@ -100,15 +71,11 @@
         </div>
       </div>
     </header>
-
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6" id="kanbanBoard">
-        <!-- Colunas do Kanban geradas via JS -->
-      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6" id="kanbanBoard"></div>
     </main>
   </div>
 
-  <!-- Modal: Nova/Editar Ordem de Serviço -->
   <div id="osModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="modal-content w-full max-w-lg overflow-y-auto">
       <form id="osForm" class="p-6">
@@ -130,7 +97,6 @@
     </div>
   </div>
 
-  <!-- Modal: Detalhes da O.S. -->
   <div id="detailsModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="modal-content w-full max-w-3xl overflow-y-auto">
       <div class="p-6">
@@ -141,16 +107,11 @@
           </div>
           <button class="btn-close-modal text-2xl text-gray-400 hover:text-gray-600">&times;</button>
         </div>
-        
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Coluna da Timeline -->
           <div class="lg:pr-4">
             <h3 class="font-bold text-lg mb-4">Histórico da O.S.</h3>
-            <div id="timelineContainer" class="space-y-6 timeline">
-              <!-- Itens da Timeline gerados via JS -->
-            </div>
+            <div id="timelineContainer" class="space-y-6 timeline"></div>
           </div>
-          <!-- Coluna de Ações -->
           <div>
             <div class="bg-gray-50 p-4 rounded-lg">
               <h3 class="font-bold text-lg mb-4">Adicionar Atualização</h3>
@@ -161,19 +122,39 @@
                   <input id="logPecas" type="text" placeholder="Peças (opcional)" class="p-2 border rounded w-1/2">
                   <input id="logValor" type="number" step="0.01" placeholder="Valor R$ (opcional)" class="p-2 border rounded w-1/2">
                 </div>
-                <input id="logMediaUrl" type="url" placeholder="Link de Foto ou Vídeo (opcional)" class="p-2 border rounded w-full">
+                <div>
+                  <label for="logMediaFile" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
+                    <i class='bx bx-camera'></i> Anexar Imagem
+                  </label>
+                  <input id="logMediaFile" type="file" accept="image/*" class="hidden">
+                  <p id="fileName" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+                <input id="logVideoUrl" type="url" placeholder="Ou cole o link de um vídeo (YouTube, etc)" class="p-2 border rounded w-full">
                 <button type="submit" class="w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center justify-center gap-2">
                   <i class='bx bx-message-square-add'></i> Adicionar ao Histórico
                 </button>
               </form>
             </div>
-            <div class="mt-4 flex justify-end gap-2">
-                 <button id="deleteOsBtn" class="btn bg-red-600 hover:bg-red-700 text-white p-2" title="Excluir O.S.">
-                    <i class='bx bx-trash'></i>
-                 </button>
+            <div class="mt-4 flex justify-between items-center">
+              <button id="moveOsBtn" class="btn bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 flex items-center gap-2">
+                <i class='bx bx-move'></i> Mover O.S.
+              </button>
+              <button id="deleteOsBtn" class="btn bg-red-600 hover:bg-red-700 text-white p-2" title="Excluir O.S.">
+                <i class='bx bx-trash'></i>
+              </button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="moveOsModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content w-full max-w-sm">
+      <div class="p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Mover para...</h2>
+        <div id="moveOptionsContainer" class="grid grid-cols-1 gap-2"></div>
+        <button class="btn-close-modal mt-4 w-full btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2">Cancelar</button>
       </div>
     </div>
   </div>
@@ -184,308 +165,340 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // --- CONFIGURAÇÃO FIREBASE ---
     const firebaseConfig = {
-        apiKey: "AIzaSyB5JpYm8l0AlF5ZG3HtkyFZgmrpsUrDhv0",
-        authDomain: "dashboard-oficina-pro.firebaseapp.com",
-        databaseURL: "https://dashboard-oficina-pro-default-rtdb.firebaseio.com",
-        projectId: "dashboard-oficina-pro",
-        storageBucket: "dashboard-oficina-pro.appspot.com",
-        messagingSenderId: "736157192887",
-        appId: "1:736157192887:web:c23d3daade848a33d67332"
+      apiKey: "AIzaSyB5JpYm8l0AlF5ZG3HtkyFZgmrpsUrDhv0",
+      authDomain: "dashboard-oficina-pro.firebaseapp.com",
+      databaseURL: "https://dashboard-oficina-pro-default-rtdb.firebaseio.com",
+      projectId: "dashboard-oficina-pro",
+      storageBucket: "dashboard-oficina-pro.appspot.com",
+      messagingSenderId: "736157192887",
+      appId: "1:736157192887:web:c23d3daade848a33d67332"
     };
+    
+    const imgbbApiKey = "57cb1c5a02fb6e5ef2700543d6245b70";
 
-    // --- INICIALIZAÇÃO E LÓGICA ---
     document.addEventListener('DOMContentLoaded', () => {
-        // --- INICIALIZAÇÃO FIREBASE ---
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
 
-        // --- VARIÁVEIS GLOBAIS E CONSTANTES ---
-        let currentUser = null;
-        let allServiceOrders = {};
-        const USERS = [
-            { name: 'Augusto', role: 'Gestor' }, { name: 'William Barbosa', role: 'Atendente' },
-            { name: 'Thiago Ventura Valencio', role: 'Atendente' }, { name: 'Fernando', role: 'Mecânico' },
-            { name: 'Gustavo', role: 'Mecânico' }, { name: 'Marcelo', role: 'Mecânico' }
-        ];
-        const STATUS_LIST = [
-            'Aguardando-Mecanico', 'Em-Analise', 'Orcamento-Enviado', 'Aguardando-Aprovacao',
-            'Servico-Autorizado', 'Em-Execucao', 'Finalizado-Aguardando-Retirada', 'Entregue'
-        ];
+      let currentUser = null;
+      let allServiceOrders = {};
+      const USERS = [
+        { name: 'Augusto', role: 'Gestor' }, { name: 'William Barbosa', role: 'Atendente' },
+        { name: 'Thiago Ventura Valencio', role: 'Atendente' }, { name: 'Fernando', role: 'Mecânico' },
+        { name: 'Gustavo', role: 'Mecânico' }, { name: 'Marcelo', role: 'Mecânico' }
+      ];
+      const STATUS_LIST = [
+        'Aguardando-Mecanico', 'Em-Analise', 'Orcamento-Enviado', 'Aguardando-Aprovacao',
+        'Servico-Autorizado', 'Em-Execucao', 'Finalizado-Aguardando-Retirada', 'Entregue'
+      ];
 
-        // --- REFERÊNCIAS DO DOM ---
-        const userScreen = document.getElementById('userScreen');
-        const app = document.getElementById('app');
-        const userList = document.getElementById('userList');
-        const kanbanBoard = document.getElementById('kanbanBoard');
-        const addOSBtn = document.getElementById('addOSBtn');
-        const logoutButton = document.getElementById('logoutButton');
-        const osModal = document.getElementById('osModal');
-        const osForm = document.getElementById('osForm');
-        const detailsModal = document.getElementById('detailsModal');
-        const logForm = document.getElementById('logForm');
+      const userScreen = document.getElementById('userScreen');
+      const app = document.getElementById('app');
+      const userList = document.getElementById('userList');
+      const kanbanBoard = document.getElementById('kanbanBoard');
+      const addOSBtn = document.getElementById('addOSBtn');
+      const logoutButton = document.getElementById('logoutButton');
+      const osModal = document.getElementById('osModal');
+      const osForm = document.getElementById('osForm');
+      const detailsModal = document.getElementById('detailsModal');
+      const logForm = document.getElementById('logForm');
+      const moveOsModal = document.getElementById('moveOsModal');
+      const moveOsBtn = document.getElementById('moveOsBtn');
 
-        // --- FUNÇÕES DE UTILIDADE ---
-        const showNotification = (message, type = 'success') => {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification show ${type}`;
-            setTimeout(() => notification.classList.remove('show'), 4000);
-        };
-        const formatStatus = (status) => status.replace(/-/g, ' ');
-        const slugify = (text) => text.replace(/\s+/g, '-');
+      const showNotification = (message, type = 'success') => {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification show ${type}`;
+        setTimeout(() => notification.classList.remove('show'), 4000);
+      };
+      const formatStatus = (status) => status.replace(/-/g, ' ');
 
-        // --- LÓGICA DE AUTENTICAÇÃO ---
-        const loginUser = (user) => {
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            document.getElementById('currentUserName').textContent = user.name;
-            userScreen.classList.add('hidden');
-            app.classList.remove('hidden');
-            listenToServiceOrders();
-        };
+      const loginUser = (user) => {
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        document.getElementById('currentUserName').textContent = user.name;
+        userScreen.classList.add('hidden');
+        app.classList.remove('hidden');
+        listenToServiceOrders();
+      };
 
-        const checkLoggedInUser = () => {
-            const storedUser = localStorage.getItem('currentUser');
-            if (storedUser) loginUser(JSON.parse(storedUser));
-            else {
-                userList.innerHTML = USERS.map(user => 
-                    `<div class="p-4 bg-gray-100 rounded-lg hover:bg-blue-100 cursor-pointer user-btn" data-user='${JSON.stringify(user)}'>
-                        <p class="font-semibold">${user.name}</p>
-                        <p class="text-sm text-gray-500">${user.role}</p>
-                    </div>`
-                ).join('');
-            }
-        };
+      const checkLoggedInUser = () => {
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) loginUser(JSON.parse(storedUser));
+        else {
+          userList.innerHTML = USERS.map(user =>
+            `<div class="p-4 bg-gray-100 rounded-lg hover:bg-blue-100 cursor-pointer user-btn" data-user='${JSON.stringify(user)}'>
+              <p class="font-semibold">${user.name}</p><p class="text-sm text-gray-500">${user.role}</p>
+            </div>`
+          ).join('');
+        }
+      };
 
-        // --- LÓGICA DO KANBAN ---
-        const renderKanban = () => {
-            kanbanBoard.innerHTML = STATUS_LIST.map(status => `
-                <div class="status-column p-3">
-                    <h3 class="font-bold text-gray-700 mb-3 px-1">${formatStatus(status)}</h3>
-                    <div class="space-y-3 min-h-[50px] vehicle-list" data-status="${status}"></div>
-                </div>
-            `).join('');
-            
-            Object.values(allServiceOrders).forEach(os => {
-                const list = kanbanBoard.querySelector(`.vehicle-list[data-status="${os.status}"]`);
-                if (list) list.insertAdjacentHTML('beforeend', createCardHTML(os));
-            });
-
-            setupDragAndDrop();
-        };
-
-        const createCardHTML = (os) => `
-            <div class="vehicle-card status-${os.status}" data-os-id="${os.id}">
-                <p class="font-bold text-gray-800">${os.placa}</p>
-                <p class="text-sm text-gray-600">${os.modelo}</p>
-                <p class="text-xs text-gray-400 mt-2">Cliente: ${os.cliente}</p>
-            </div>
-        `;
-
-        const setupDragAndDrop = () => {
-            document.querySelectorAll('.vehicle-list').forEach(list => {
-                new Sortable(list, {
-                    group: 'vehicles',
-                    animation: 150,
-                    onEnd: (evt) => {
-                        const osId = evt.item.dataset.osId;
-                        const newStatus = evt.to.dataset.status;
-                        updateServiceOrderStatus(osId, newStatus);
-                    }
-                });
-            });
-        };
-
-        // --- LÓGICA DE DADOS (FIREBASE) ---
-        const listenToServiceOrders = () => {
-            db.ref('serviceOrders').on('value', snapshot => {
-                allServiceOrders = snapshot.val() || {};
-                // Adiciona o ID a cada objeto para fácil referência
-                Object.keys(allServiceOrders).forEach(id => allServiceOrders[id].id = id);
-                renderKanban();
-            }, error => {
-                console.error(error);
-                showNotification("Erro de conexão com o banco de dados.", 'error');
-            });
-        };
-
-        const updateServiceOrderStatus = (osId, newStatus) => {
-            const updates = {
-                status: newStatus,
-                lastUpdate: new Date().toISOString()
-            };
-            db.ref(`serviceOrders/${osId}`).update(updates);
-            
-            const logEntry = {
-                type: 'status',
-                description: `Status alterado para: ${formatStatus(newStatus)}`,
-                user: currentUser.name,
-                timestamp: new Date().toISOString()
-            };
-            db.ref(`serviceOrders/${osId}/timeline`).push(logEntry)
-              .then(() => showNotification("Status atualizado!"))
-              .catch(err => showNotification("Erro ao registrar a mudança de status.", 'error'));
-        };
-
-        // --- LÓGICA DOS MODAIS ---
-        const openOsModal = (os = null) => {
-            osForm.reset();
-            document.getElementById('osId').value = os ? os.id : '';
-            document.getElementById('osModalTitle').textContent = os ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço';
-            if(os) {
-                document.getElementById('osPlaca').value = os.placa;
-                document.getElementById('osModelo').value = os.modelo;
-                document.getElementById('osCliente').value = os.cliente;
-                document.getElementById('osTelefone').value = os.telefone;
-                document.getElementById('osObservacoes').value = os.initialNotes;
-                document.getElementById('osResponsavel').value = os.responsible;
-            }
-            osModal.classList.remove('hidden');
-            osModal.classList.add('flex');
-        };
-
-        const renderDetailsModal = (os) => {
-            document.getElementById('detailsPlacaModelo').textContent = `${os.placa} - ${os.modelo}`;
-            document.getElementById('detailsCliente').textContent = `Cliente: ${os.cliente}`;
-            document.getElementById('logOsId').value = os.id;
-            
-            const timelineContainer = document.getElementById('timelineContainer');
-            timelineContainer.innerHTML = '';
-            if (os.timeline) {
-                Object.values(os.timeline).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(log => {
-                    timelineContainer.innerHTML += createTimelineItemHTML(log);
-                });
-            }
-            detailsModal.classList.remove('hidden');
-            detailsModal.classList.add('flex');
-        };
-        
-        const createTimelineItemHTML = (log) => {
-            const date = new Date(log.timestamp);
-            const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-            let iconClass = 'timeline-item-log';
-            if(log.type === 'status') iconClass = 'timeline-item-status';
-            if(log.type === 'budget') iconClass = 'timeline-item-budget';
-
-            return `
-                <div class="timeline-item ${iconClass}">
-                    <p class="font-semibold text-gray-800">${log.description}</p>
-                    ${log.pecas ? `<p class="text-sm text-gray-600">Peças: ${log.pecas}</p>` : ''}
-                    ${log.valor ? `<p class="text-sm text-gray-600">Valor: R$ ${log.valor}</p>` : ''}
-                    ${log.mediaUrl ? `<a href="${log.mediaUrl}" target="_blank" class="text-sm text-blue-500 hover:underline">Ver Mídia</a>` : ''}
-                    <p class="text-xs text-gray-400 mt-1">${log.user} em ${formattedDate}</p>
-                </div>
-            `;
-        };
-        
-        // --- EVENT LISTENERS ---
-        document.addEventListener('click', (e) => {
-            // Login
-            if (e.target.closest('.user-btn')) {
-                loginUser(JSON.parse(e.target.closest('.user-btn').dataset.user));
-            }
-            // Abrir modal de detalhes
-            if (e.target.closest('.vehicle-card')) {
-                const osId = e.target.closest('.vehicle-card').dataset.osId;
-                if (allServiceOrders[osId]) renderDetailsModal(allServiceOrders[osId]);
-            }
-            // Fechar modais
-            if (e.target.closest('.btn-close-modal')) {
-                e.target.closest('.modal').classList.add('hidden');
-                e.target.closest('.modal').classList.remove('flex');
-            }
+      const renderKanban = () => {
+        kanbanBoard.innerHTML = STATUS_LIST.map(status => `
+          <div class="status-column p-3">
+            <h3 class="font-bold text-gray-700 mb-3 px-1">${formatStatus(status)}</h3>
+            <div class="space-y-3 min-h-[50px] vehicle-list" data-status="${status}"></div>
+          </div>`).join('');
+        Object.values(allServiceOrders).forEach(os => {
+          const list = kanbanBoard.querySelector(`.vehicle-list[data-status="${os.status}"]`);
+          if (list) list.insertAdjacentHTML('beforeend', createCardHTML(os));
         });
-        
-        addOSBtn.addEventListener('click', () => openOsModal());
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            window.location.reload();
+        setupDragAndDrop();
+      };
+
+      const createCardHTML = (os) => `
+        <div class="vehicle-card status-${os.status}" data-os-id="${os.id}">
+          <p class="font-bold text-gray-800">${os.placa}</p>
+          <p class="text-sm text-gray-600">${os.modelo}</p>
+          <p class="text-xs text-gray-400 mt-2">Cliente: ${os.cliente}</p>
+        </div>`;
+
+      const setupDragAndDrop = () => {
+        document.querySelectorAll('.vehicle-list').forEach(list => {
+          new Sortable(list, { group: 'vehicles', animation: 150, onEnd: (evt) => {
+            const osId = evt.item.dataset.osId;
+            const newStatus = evt.to.dataset.status;
+            updateServiceOrderStatus(osId, newStatus);
+          }});
         });
+      };
 
-        osForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const osId = document.getElementById('osId').value;
-            const osData = {
-                placa: document.getElementById('osPlaca').value.toUpperCase(),
-                modelo: document.getElementById('osModelo').value,
-                cliente: document.getElementById('osCliente').value,
-                telefone: document.getElementById('osTelefone').value,
-                responsible: document.getElementById('osResponsavel').value,
-                initialNotes: document.getElementById('osObservacoes').value,
-                lastUpdate: new Date().toISOString(),
-            };
+      const listenToServiceOrders = () => {
+        db.ref('serviceOrders').on('value', snapshot => {
+          allServiceOrders = snapshot.val() || {};
+          Object.keys(allServiceOrders).forEach(id => allServiceOrders[id].id = id);
+          renderKanban();
+        }, error => {
+          console.error(error);
+          showNotification("Erro de conexão com o banco de dados.", 'error');
+        });
+      };
 
-            if (osId) { // Editando
-                db.ref(`serviceOrders/${osId}`).update(osData)
-                  .then(() => showNotification("O.S. atualizada com sucesso!"))
-                  .catch(err => showNotification("Erro ao atualizar O.S.", 'error'));
-            } else { // Criando
-                osData.status = 'Aguardando-Mecanico';
-                osData.entryDate = new Date().toISOString();
-                const newOsRef = db.ref('serviceOrders').push(osData);
-                const logEntry = {
-                    type: 'status',
-                    description: 'Ordem de Serviço criada.',
-                    user: currentUser.name,
-                    timestamp: new Date().toISOString()
-                };
-                newOsRef.child('timeline').push(logEntry);
-                showNotification("O.S. criada com sucesso!");
+      const updateServiceOrderStatus = (osId, newStatus) => {
+        const updates = { status: newStatus, lastUpdate: new Date().toISOString() };
+        db.ref(`serviceOrders/${osId}`).update(updates);
+        const logEntry = {
+          type: 'status',
+          description: `Status alterado para: ${formatStatus(newStatus)}`,
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        };
+        db.ref(`serviceOrders/${osId}/timeline`).push(logEntry)
+          .then(() => showNotification("Status atualizado!"))
+          .catch(err => showNotification("Erro ao registrar a mudança de status.", 'error'));
+      };
+
+      const openOsModal = (os = null) => {
+        osForm.reset();
+        document.getElementById('osId').value = os ? os.id : '';
+        document.getElementById('osModalTitle').textContent = os ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço';
+        if(os) {
+          document.getElementById('osPlaca').value = os.placa;
+          document.getElementById('osModelo').value = os.modelo;
+          document.getElementById('osCliente').value = os.cliente;
+          document.getElementById('osTelefone').value = os.telefone;
+          document.getElementById('osObservacoes').value = os.initialNotes;
+          document.getElementById('osResponsavel').value = os.responsible;
+        }
+        osModal.classList.remove('hidden');
+        osModal.classList.add('flex');
+      };
+
+      const renderDetailsModal = (os) => {
+        document.getElementById('detailsPlacaModelo').textContent = `${os.placa} - ${os.modelo}`;
+        document.getElementById('detailsCliente').textContent = `Cliente: ${os.cliente}`;
+        document.getElementById('logOsId').value = os.id;
+        moveOsBtn.dataset.osId = os.id;
+        moveOsBtn.dataset.currentStatus = os.status;
+        const timelineContainer = document.getElementById('timelineContainer');
+        timelineContainer.innerHTML = '';
+        if (os.timeline) {
+          Object.values(os.timeline).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(log => {
+            timelineContainer.innerHTML += createTimelineItemHTML(log);
+          });
+        }
+        detailsModal.classList.remove('hidden');
+        detailsModal.classList.add('flex');
+      };
+
+      const createTimelineItemHTML = (log) => {
+        const date = new Date(log.timestamp);
+        const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        let iconClass = 'timeline-item-log';
+        if(log.type === 'status') iconClass = 'timeline-item-status';
+        return `
+          <div class="timeline-item ${iconClass}">
+            <p class="font-semibold text-gray-800">${log.description}</p>
+            ${log.pecas ? `<p class="text-sm text-gray-600">Peças: ${log.pecas}</p>` : ''}
+            ${log.valor ? `<p class="text-sm text-gray-600">Valor: R$ ${log.valor}</p>` : ''}
+            ${log.mediaUrl ? `<a href="${log.mediaUrl}" target="_blank" class="text-sm text-blue-500 hover:underline">Ver Mídia Anexada</a>` : ''}
+            <p class="text-xs text-gray-400 mt-1">${log.user} em ${formattedDate}</p>
+          </div>`;
+      };
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.user-btn')) {
+          loginUser(JSON.parse(e.target.closest('.user-btn').dataset.user));
+        }
+        if (e.target.closest('.vehicle-card')) {
+          const osId = e.target.closest('.vehicle-card').dataset.osId;
+          if (allServiceOrders[osId]) renderDetailsModal(allServiceOrders[osId]);
+        }
+        if (e.target.closest('.btn-close-modal')) {
+          e.target.closest('.modal').classList.add('hidden');
+          e.target.closest('.modal').classList.remove('flex');
+        }
+      });
+      
+      addOSBtn.addEventListener('click', () => openOsModal());
+      logoutButton.addEventListener('click', () => {
+        localStorage.removeItem('currentUser');
+        window.location.reload();
+      });
+
+      osForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const osId = document.getElementById('osId').value;
+        const osData = {
+          placa: document.getElementById('osPlaca').value.toUpperCase(),
+          modelo: document.getElementById('osModelo').value,
+          cliente: document.getElementById('osCliente').value,
+          telefone: document.getElementById('osTelefone').value,
+          responsible: document.getElementById('osResponsavel').value,
+          initialNotes: document.getElementById('osObservacoes').value,
+          lastUpdate: new Date().toISOString(),
+        };
+        if (osId) {
+          db.ref(`serviceOrders/${osId}`).update(osData)
+            .then(() => showNotification("O.S. atualizada!"))
+            .catch(err => showNotification("Erro ao atualizar O.S.", 'error'));
+        } else {
+          osData.status = 'Aguardando-Mecanico';
+          osData.entryDate = new Date().toISOString();
+          const newOsRef = db.ref('serviceOrders').push(osData);
+          const logEntry = { type: 'status', description: 'Ordem de Serviço criada.', user: currentUser.name, timestamp: new Date().toISOString() };
+          newOsRef.child('timeline').push(logEntry);
+          showNotification("O.S. criada com sucesso!");
+        }
+        osModal.classList.add('hidden');
+        osModal.classList.remove('flex');
+      });
+
+      logForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Salvando...`;
+
+        const osId = document.getElementById('logOsId').value;
+        const imageFile = document.getElementById('logMediaFile').files[0];
+        let mediaUrl = document.getElementById('logVideoUrl').value.trim() || null;
+
+        if (imageFile) {
+          if (imgbbApiKey === "SUA_CHAVE_API_VAI_AQUI") {
+            showNotification("Configure sua chave de API do ImgBB no código.", 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class='bx bx-message-square-add'></i> Adicionar ao Histórico`;
+            return;
+          }
+          const formData = new FormData();
+          formData.append('image', imageFile);
+          try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.success) {
+              mediaUrl = result.data.url;
+            } else {
+              throw new Error(result.error.message);
             }
-            osModal.classList.add('hidden');
-            osModal.classList.remove('flex');
-        });
+          } catch (error) {
+            showNotification(`Erro no upload da imagem: ${error.message}`, 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class='bx bx-message-square-add'></i> Adicionar ao Histórico`;
+            return;
+          }
+        }
 
-        logForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const osId = document.getElementById('logOsId').value;
-            const logEntry = {
-                type: 'log',
-                description: document.getElementById('logDescricao').value,
-                pecas: document.getElementById('logPecas').value || null,
-                valor: document.getElementById('logValor').value || null,
-                mediaUrl: document.getElementById('logMediaUrl').value || null,
-                user: currentUser.name,
-                timestamp: new Date().toISOString()
-            };
-            db.ref(`serviceOrders/${osId}/timeline`).push(logEntry)
-              .then(() => {
-                  showNotification("Registro adicionado ao histórico!");
-                  logForm.reset();
-                  // Forçar atualização do modal
-                  if (allServiceOrders[osId]) {
-                      db.ref(`serviceOrders/${osId}`).once('value', snapshot => {
-                         renderDetailsModal(snapshot.val());
-                      });
-                  }
-              })
-              .catch(err => showNotification("Erro ao salvar registro.", 'error'));
-        });
-        
-        document.getElementById('deleteOsBtn').addEventListener('click', () => {
-            if(currentUser.role !== 'Gestor') {
-                showNotification("Apenas gestores podem excluir uma O.S.", 'error');
-                return;
-            }
-            const osId = document.getElementById('logOsId').value;
-            if(confirm("ATENÇÃO: Excluir uma Ordem de Serviço é uma ação permanente e não pode ser desfeita. Deseja continuar?")) {
-                db.ref(`serviceOrders/${osId}`).remove()
-                  .then(() => {
-                      showNotification("O.S. excluída com sucesso.");
-                      detailsModal.classList.add('hidden');
-                      detailsModal.classList.remove('flex');
-                  })
-                  .catch(err => showNotification("Erro ao excluir O.S.", 'error'));
-            }
-        });
+        const logEntry = {
+          type: 'log',
+          description: document.getElementById('logDescricao').value,
+          pecas: document.getElementById('logPecas').value || null,
+          valor: document.getElementById('logValor').value || null,
+          mediaUrl: mediaUrl,
+          user: currentUser.name,
+          timestamp: new Date().toISOString()
+        };
 
-        // --- INICIALIZAÇÃO ---
-        const osResponsavelSelect = document.getElementById('osResponsavel');
-        osResponsavelSelect.innerHTML = '<option value="">Selecione um responsável...</option>' + USERS.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
-        checkLoggedInUser();
+        db.ref(`serviceOrders/${osId}/timeline`).push(logEntry)
+          .then(() => {
+            showNotification("Registro adicionado ao histórico!");
+            logForm.reset();
+            document.getElementById('fileName').textContent = '';
+            if (allServiceOrders[osId]) {
+              db.ref(`serviceOrders/${osId}`).once('value', snapshot => renderDetailsModal(snapshot.val()));
+            }
+          })
+          .catch(err => showNotification("Erro ao salvar registro.", 'error'))
+          .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class='bx bx-message-square-add'></i> Adicionar ao Histórico`;
+          });
+      });
+      
+      document.getElementById('logMediaFile').addEventListener('change', (e) => {
+        const fileNameEl = document.getElementById('fileName');
+        fileNameEl.textContent = e.target.files[0] ? e.target.files[0].name : '';
+      });
+
+      moveOsBtn.addEventListener('click', (e) => {
+        const osId = e.target.closest('button').dataset.osId;
+        const currentStatus = e.target.closest('button').dataset.currentStatus;
+        const container = document.getElementById('moveOptionsContainer');
+        container.innerHTML = STATUS_LIST.map(status => `
+          <button data-os-id="${osId}" data-new-status="${status}" class="move-option-btn w-full text-left p-3 rounded-lg ${status === currentStatus ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}" ${status === currentStatus ? 'disabled' : ''}>
+            ${formatStatus(status)}
+          </button>
+        `).join('');
+        moveOsModal.classList.remove('hidden');
+        moveOsModal.classList.add('flex');
+      });
+
+      document.getElementById('moveOptionsContainer').addEventListener('click', (e) => {
+        if (e.target.classList.contains('move-option-btn')) {
+          const osId = e.target.dataset.osId;
+          const newStatus = e.target.dataset.newStatus;
+          updateServiceOrderStatus(osId, newStatus);
+          moveOsModal.classList.add('hidden');
+          moveOsModal.classList.remove('flex');
+          detailsModal.classList.add('hidden');
+          detailsModal.classList.remove('flex');
+        }
+      });
+
+      document.getElementById('deleteOsBtn').addEventListener('click', () => {
+        if(currentUser.role !== 'Gestor') {
+          showNotification("Apenas gestores podem excluir uma O.S.", 'error');
+          return;
+        }
+        const osId = document.getElementById('logOsId').value;
+        if(confirm("ATENÇÃO: Excluir uma Ordem de Serviço é uma ação permanente. Deseja continuar?")) {
+          db.ref(`serviceOrders/${osId}`).remove()
+            .then(() => {
+              showNotification("O.S. excluída com sucesso.");
+              detailsModal.classList.add('hidden');
+              detailsModal.classList.remove('flex');
+            })
+            .catch(err => showNotification("Erro ao excluir O.S.", 'error'));
+        }
+      });
+
+      const osResponsavelSelect = document.getElementById('osResponsavel');
+      osResponsavelSelect.innerHTML = '<option value="">Selecione um responsável...</option>' + USERS.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+      checkLoggedInUser();
     });
   </script>
 </body>
 </html>
+
