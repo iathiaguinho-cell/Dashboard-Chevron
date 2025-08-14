@@ -6,16 +6,16 @@
   <title>Dashboard Oficina - Gestão de Pátio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f7; }
-    .status-column { background: #e2e8f0; border-radius: 12px; min-height: 70vh; }
+    .status-column { background: #e2e8f0; border-radius: 12px; min-height: 70vh; display: flex; flex-direction: column; }
+    .vehicle-list { flex-grow: 1; }
     .vehicle-card {
       background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      cursor: grab; transition: all 0.2s ease-in-out; border-left: 5px solid #3b82f6;
+      transition: all 0.2s ease-in-out; border-left: 5px solid #3b82f6;
     }
-    .vehicle-card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1); }
+    .vehicle-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1); }
     .vehicle-card.status-Aguardando-Mecanico { border-left-color: #f59e0b; }
     .vehicle-card.status-Em-Analise { border-left-color: #8b5cf6; }
     .vehicle-card.status-Orcamento-Enviado { border-left-color: #06b6d4; }
@@ -23,19 +23,21 @@
     .vehicle-card.status-Servico-Autorizado { border-left-color: #10b981; }
     .vehicle-card.status-Em-Execucao { border-left-color: #ef4444; }
     .vehicle-card.status-Finalizado-Aguardando-Retirada { border-left-color: #f97316; }
-    .vehicle-card.status-Entregue { border-left-color: #6b7280; opacity: 0.8; }
-    .modal { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
-    .modal-content { background: white; border-radius: 16px; max-height: 90vh; }
+    .vehicle-card.status-Entregue { border-left-color: #6b7280; opacity: 0.9; }
+    .modal { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); }
+    .modal-content { background: #f8fafc; border-radius: 16px; max-height: 90vh; }
     .btn { transition: all 0.2s ease; border-radius: 8px; font-weight: 600; }
     .btn:hover { transform: translateY(-2px); }
-    .timeline { border-left: 2px solid #e5e7eb; }
-    .timeline-item { position: relative; padding-left: 2rem; }
-    .timeline-item::before {
-      content: ''; position: absolute; left: -0.5rem; top: 0.25rem; width: 0.875rem; height: 0.875rem;
-      border-radius: 9999px; background-color: white; border: 2px solid #9ca3af;
+    .timeline { border-left: 3px solid #e5e7eb; }
+    .timeline-item { position: relative; padding-left: 2.5rem; }
+    .timeline-icon {
+      position: absolute; left: -0.875rem; top: 0; width: 1.75rem; height: 1.75rem;
+      border-radius: 9999px; background-color: white; border: 3px solid;
+      display: flex; align-items: center; justify-content: center;
     }
-    .timeline-item-log::before { border-color: #3b82f6; }
-    .timeline-item-status::before { border-color: #10b981; }
+    .timeline-item-log .timeline-icon { border-color: #3b82f6; color: #3b82f6; }
+    .timeline-item-status .timeline-icon { border-color: #10b981; color: #10b981; }
+    .timeline-item-value .timeline-icon { border-color: #f59e0b; color: #f59e0b; }
     .notification {
       position: fixed; top: 20px; right: 20px; z-index: 1050; padding: 1rem 1.5rem;
       border-radius: 0.75rem; color: white; font-weight: 600;
@@ -98,27 +100,29 @@
   </div>
 
   <div id="detailsModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-3xl overflow-y-auto">
-      <div class="p-6">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <h2 id="detailsPlacaModelo" class="text-2xl font-bold text-gray-800"></h2>
-            <p id="detailsCliente" class="text-gray-600"></p>
+    <div class="modal-content w-full max-w-4xl overflow-y-auto">
+      <div class="p-6 sm:p-8">
+        <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 id="detailsPlacaModelo" class="text-3xl font-bold text-gray-800"></h2>
+              <p id="detailsCliente" class="text-lg text-gray-600"></p>
+            </div>
+            <button class="btn-close-modal text-3xl text-gray-400 hover:text-gray-600">&times;</button>
           </div>
-          <button class="btn-close-modal text-2xl text-gray-400 hover:text-gray-600">&times;</button>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="lg:pr-4">
-            <h3 class="font-bold text-lg mb-4">Histórico da O.S.</h3>
-            <div id="timelineContainer" class="space-y-6 timeline"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div class="lg:col-span-3">
+            <h3 class="font-bold text-xl mb-4 text-gray-700">Histórico da O.S.</h3>
+            <div id="timelineContainer" class="space-y-8 timeline"></div>
           </div>
-          <div>
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h3 class="font-bold text-lg mb-4">Adicionar Atualização</h3>
-              <form id="logForm" class="space-y-3">
+          <div class="lg:col-span-2">
+            <div class="bg-white p-4 rounded-lg shadow-sm sticky top-4">
+              <h3 class="font-bold text-xl mb-4 text-gray-700">Adicionar Atualização</h3>
+              <form id="logForm" class="space-y-4">
                 <input type="hidden" id="logOsId">
                 <textarea id="logDescricao" placeholder="Descrição do serviço, peça, observação..." rows="3" required class="p-2 border rounded w-full"></textarea>
-                <div class="flex gap-2">
+                <div class="flex gap-4">
                   <input id="logPecas" type="text" placeholder="Peças (opcional)" class="p-2 border rounded w-1/2">
                   <input id="logValor" type="number" step="0.01" placeholder="Valor R$ (opcional)" class="p-2 border rounded w-1/2">
                 </div>
@@ -127,34 +131,20 @@
                     <i class='bx bx-camera'></i> Anexar Imagem
                   </label>
                   <input id="logMediaFile" type="file" accept="image/*" class="hidden">
-                  <p id="fileName" class="text-sm text-gray-500 mt-1"></p>
+                  <p id="fileName" class="text-sm text-gray-500 mt-1 truncate"></p>
                 </div>
-                <input id="logVideoUrl" type="url" placeholder="Ou cole o link de um vídeo (YouTube, etc)" class="p-2 border rounded w-full">
                 <button type="submit" class="w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center justify-center gap-2">
                   <i class='bx bx-message-square-add'></i> Adicionar ao Histórico
                 </button>
               </form>
-            </div>
-            <div class="mt-4 flex justify-between items-center">
-              <button id="moveOsBtn" class="btn bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 flex items-center gap-2">
-                <i class='bx bx-move'></i> Mover O.S.
-              </button>
-              <button id="deleteOsBtn" class="btn bg-red-600 hover:bg-red-700 text-white p-2" title="Excluir O.S.">
-                <i class='bx bx-trash'></i>
-              </button>
+              <div class="mt-6 flex justify-end">
+                <button id="deleteOsBtn" class="btn bg-red-600 hover:bg-red-700 text-white p-2" title="Excluir O.S.">
+                  <i class='bx bx-trash text-xl'></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="moveOsModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-sm">
-      <div class="p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Mover para...</h2>
-        <div id="moveOptionsContainer" class="grid grid-cols-1 gap-2"></div>
-        <button class="btn-close-modal mt-4 w-full btn bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2">Cancelar</button>
       </div>
     </div>
   </div>
@@ -203,8 +193,6 @@
       const osForm = document.getElementById('osForm');
       const detailsModal = document.getElementById('detailsModal');
       const logForm = document.getElementById('logForm');
-      const moveOsModal = document.getElementById('moveOsModal');
-      const moveOsBtn = document.getElementById('moveOsBtn');
 
       const showNotification = (message, type = 'success') => {
         const notification = document.getElementById('notification');
@@ -235,41 +223,67 @@
         }
       };
 
-      const renderKanban = () => {
-        kanbanBoard.innerHTML = STATUS_LIST.map(status => `
-          <div class="status-column p-3">
-            <h3 class="font-bold text-gray-700 mb-3 px-1">${formatStatus(status)}</h3>
-            <div class="space-y-3 min-h-[50px] vehicle-list" data-status="${status}"></div>
-          </div>`).join('');
+      const renderKanban = (deliveredFilter = '') => {
+        kanbanBoard.innerHTML = STATUS_LIST.map(status => {
+          const isDeliveredColumn = status === 'Entregue';
+          const searchInputHTML = isDeliveredColumn ? `
+            <input type="search" id="searchDeliveredInput" placeholder="Buscar em Entregues..." 
+                   class="w-full p-2 mb-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+          ` : '';
+          return `
+            <div class="status-column p-3">
+              <h3 class="font-bold text-gray-700 mb-3 px-1">${formatStatus(status)}</h3>
+              ${searchInputHTML}
+              <div class="space-y-3 vehicle-list" data-status="${status}"></div>
+            </div>`;
+        }).join('');
+
+        const lowerCaseFilter = deliveredFilter.toLowerCase();
+
         Object.values(allServiceOrders).forEach(os => {
+          if (os.status === 'Entregue' && deliveredFilter) {
+            const searchableText = `${os.placa} ${os.modelo} ${os.cliente}`.toLowerCase();
+            if (!searchableText.includes(lowerCaseFilter)) return;
+          }
           const list = kanbanBoard.querySelector(`.vehicle-list[data-status="${os.status}"]`);
           if (list) list.insertAdjacentHTML('beforeend', createCardHTML(os));
         });
-        setupDragAndDrop();
+
+        if (document.getElementById('searchDeliveredInput')) {
+          document.getElementById('searchDeliveredInput').value = deliveredFilter;
+          document.getElementById('searchDeliveredInput').addEventListener('input', (e) => {
+            renderKanban(e.target.value);
+          });
+        }
       };
 
-      const createCardHTML = (os) => `
-        <div class="vehicle-card status-${os.status}" data-os-id="${os.id}">
-          <p class="font-bold text-gray-800">${os.placa}</p>
-          <p class="text-sm text-gray-600">${os.modelo}</p>
-          <p class="text-xs text-gray-400 mt-2">Cliente: ${os.cliente}</p>
-        </div>`;
+      const createCardHTML = (os) => {
+        const currentIndex = STATUS_LIST.indexOf(os.status);
+        const prevStatus = currentIndex > 0 ? STATUS_LIST[currentIndex - 1] : null;
+        const nextStatus = currentIndex < STATUS_LIST.length - 1 ? STATUS_LIST[currentIndex + 1] : null;
+        const prevButton = prevStatus ? `<button data-os-id="${os.id}" data-new-status="${prevStatus}" class="btn-move-status p-1 rounded-full hover:bg-gray-200"><i class='bx bx-chevron-left text-2xl text-gray-600'></i></button>` : `<div class="w-8"></div>`;
+        const nextButton = nextStatus ? `<button data-os-id="${os.id}" data-new-status="${nextStatus}" class="btn-move-status p-1 rounded-full hover:bg-gray-200"><i class='bx bx-chevron-right text-2xl text-gray-600'></i></button>` : `<div class="w-8"></div>`;
 
-      const setupDragAndDrop = () => {
-        document.querySelectorAll('.vehicle-list').forEach(list => {
-          new Sortable(list, { group: 'vehicles', animation: 150, onEnd: (evt) => {
-            const osId = evt.item.dataset.osId;
-            const newStatus = evt.to.dataset.status;
-            updateServiceOrderStatus(osId, newStatus);
-          }});
-        });
+        return `
+          <div class="vehicle-card status-${os.status}">
+            <div data-os-id="${os.id}" class="cursor-pointer">
+              <p class="font-bold text-gray-800">${os.placa}</p>
+              <p class="text-sm text-gray-600">${os.modelo}</p>
+              <p class="text-xs text-gray-400 mt-2">Cliente: ${os.cliente}</p>
+            </div>
+            <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+              ${prevButton}
+              ${nextButton}
+            </div>
+          </div>`;
       };
 
       const listenToServiceOrders = () => {
         db.ref('serviceOrders').on('value', snapshot => {
           allServiceOrders = snapshot.val() || {};
           Object.keys(allServiceOrders).forEach(id => allServiceOrders[id].id = id);
-          renderKanban();
+          const searchInput = document.getElementById('searchDeliveredInput');
+          renderKanban(searchInput ? searchInput.value : '');
         }, error => {
           console.error(error);
           showNotification("Erro de conexão com o banco de dados.", 'error');
@@ -310,8 +324,6 @@
         document.getElementById('detailsPlacaModelo').textContent = `${os.placa} - ${os.modelo}`;
         document.getElementById('detailsCliente').textContent = `Cliente: ${os.cliente}`;
         document.getElementById('logOsId').value = os.id;
-        moveOsBtn.dataset.osId = os.id;
-        moveOsBtn.dataset.currentStatus = os.status;
         const timelineContainer = document.getElementById('timelineContainer');
         timelineContainer.innerHTML = '';
         if (os.timeline) {
@@ -326,29 +338,50 @@
       const createTimelineItemHTML = (log) => {
         const date = new Date(log.timestamp);
         const formattedDate = `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-        let iconClass = 'timeline-item-log';
-        if(log.type === 'status') iconClass = 'timeline-item-status';
+        
+        let iconHTML = `<i class='bx bx-notepad'></i>`;
+        let itemClass = 'timeline-item-log';
+        if (log.type === 'status') {
+          iconHTML = `<i class='bx bx-flag'></i>`;
+          itemClass = 'timeline-item-status';
+        } else if (log.valor) {
+          iconHTML = `<i class='bx bx-dollar'></i>`;
+          itemClass = 'timeline-item-value';
+        }
+
+        let mediaHTML = '';
+        if (log.mediaUrl) {
+            const isImage = /\.(jpeg|jpg|gif|png|webp)$/i.test(log.mediaUrl);
+            if (isImage) {
+                mediaHTML = `<a href="${log.mediaUrl}" target="_blank"><img src="${log.mediaUrl}" class="mt-2 rounded-lg max-w-xs h-auto border-2 border-white shadow-md cursor-pointer"></a>`;
+            } else {
+                mediaHTML = `<a href="${log.mediaUrl}" target="_blank" class="mt-2 inline-block text-sm text-blue-600 hover:underline">Ver Mídia Anexada (Vídeo/Outro)</a>`;
+            }
+        }
+
         return `
-          <div class="timeline-item ${iconClass}">
-            <p class="font-semibold text-gray-800">${log.description}</p>
-            ${log.pecas ? `<p class="text-sm text-gray-600">Peças: ${log.pecas}</p>` : ''}
-            ${log.valor ? `<p class="text-sm text-gray-600">Valor: R$ ${log.valor}</p>` : ''}
-            ${log.mediaUrl ? `<a href="${log.mediaUrl}" target="_blank" class="text-sm text-blue-500 hover:underline">Ver Mídia Anexada</a>` : ''}
-            <p class="text-xs text-gray-400 mt-1">${log.user} em ${formattedDate}</p>
+          <div class="timeline-item ${itemClass}">
+            <div class="timeline-icon">${iconHTML}</div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-semibold text-gray-800">${log.description}</p>
+              ${log.pecas ? `<p class="text-sm text-gray-600"><strong>Peças:</strong> ${log.pecas}</p>` : ''}
+              ${log.valor ? `<p class="text-sm text-gray-600"><strong>Valor:</strong> R$ ${parseFloat(log.valor).toFixed(2)}</p>` : ''}
+              ${mediaHTML}
+              <p class="text-xs text-gray-400 mt-2 text-right">${log.user} em ${formattedDate}</p>
+            </div>
           </div>`;
       };
 
       document.addEventListener('click', (e) => {
-        if (e.target.closest('.user-btn')) {
-          loginUser(JSON.parse(e.target.closest('.user-btn').dataset.user));
-        }
-        if (e.target.closest('.vehicle-card')) {
+        if (e.target.closest('.user-btn')) loginUser(JSON.parse(e.target.closest('.user-btn').dataset.user));
+        if (e.target.closest('.vehicle-card') && !e.target.closest('.btn-move-status')) {
           const osId = e.target.closest('.vehicle-card').dataset.osId;
           if (allServiceOrders[osId]) renderDetailsModal(allServiceOrders[osId]);
         }
-        if (e.target.closest('.btn-close-modal')) {
-          e.target.closest('.modal').classList.add('hidden');
-          e.target.closest('.modal').classList.remove('flex');
+        if (e.target.closest('.btn-close-modal')) e.target.closest('.modal').classList.add('hidden');
+        if (e.target.closest('.btn-move-status')) {
+          const btn = e.target.closest('.btn-move-status');
+          updateServiceOrderStatus(btn.dataset.osId, btn.dataset.newStatus);
         }
       });
       
@@ -383,7 +416,6 @@
           showNotification("O.S. criada com sucesso!");
         }
         osModal.classList.add('hidden');
-        osModal.classList.remove('flex');
       });
 
       logForm.addEventListener('submit', async (e) => {
@@ -394,7 +426,7 @@
 
         const osId = document.getElementById('logOsId').value;
         const imageFile = document.getElementById('logMediaFile').files[0];
-        let mediaUrl = document.getElementById('logVideoUrl').value.trim() || null;
+        let mediaUrl = null;
 
         if (imageFile) {
           if (imgbbApiKey === "SUA_CHAVE_API_VAI_AQUI") {
@@ -408,11 +440,8 @@
           try {
             const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, { method: 'POST', body: formData });
             const result = await response.json();
-            if (result.success) {
-              mediaUrl = result.data.url;
-            } else {
-              throw new Error(result.error.message);
-            }
+            if (result.success) { mediaUrl = result.data.url; } 
+            else { throw new Error(result.error.message); }
           } catch (error) {
             showNotification(`Erro no upload da imagem: ${error.message}`, 'error');
             submitBtn.disabled = false;
@@ -452,31 +481,6 @@
         fileNameEl.textContent = e.target.files[0] ? e.target.files[0].name : '';
       });
 
-      moveOsBtn.addEventListener('click', (e) => {
-        const osId = e.target.closest('button').dataset.osId;
-        const currentStatus = e.target.closest('button').dataset.currentStatus;
-        const container = document.getElementById('moveOptionsContainer');
-        container.innerHTML = STATUS_LIST.map(status => `
-          <button data-os-id="${osId}" data-new-status="${status}" class="move-option-btn w-full text-left p-3 rounded-lg ${status === currentStatus ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}" ${status === currentStatus ? 'disabled' : ''}>
-            ${formatStatus(status)}
-          </button>
-        `).join('');
-        moveOsModal.classList.remove('hidden');
-        moveOsModal.classList.add('flex');
-      });
-
-      document.getElementById('moveOptionsContainer').addEventListener('click', (e) => {
-        if (e.target.classList.contains('move-option-btn')) {
-          const osId = e.target.dataset.osId;
-          const newStatus = e.target.dataset.newStatus;
-          updateServiceOrderStatus(osId, newStatus);
-          moveOsModal.classList.add('hidden');
-          moveOsModal.classList.remove('flex');
-          detailsModal.classList.add('hidden');
-          detailsModal.classList.remove('flex');
-        }
-      });
-
       document.getElementById('deleteOsBtn').addEventListener('click', () => {
         if(currentUser.role !== 'Gestor') {
           showNotification("Apenas gestores podem excluir uma O.S.", 'error');
@@ -488,7 +492,6 @@
             .then(() => {
               showNotification("O.S. excluída com sucesso.");
               detailsModal.classList.add('hidden');
-              detailsModal.classList.remove('flex');
             })
             .catch(err => showNotification("Erro ao excluir O.S.", 'error'));
         }
