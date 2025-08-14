@@ -184,22 +184,20 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // --- CONFIGURAÇÃO FIREBASE (SUBSTITUIR) ---
-    apiKey: "AIzaSyB5JpYm8l0AlF5ZG3HtkyFZgmrpsUrDhv0",
-    authDomain: "dashboard-oficina-pro.firebaseapp.com",
-    databaseURL: "https://dashboard-oficina-pro-default-rtdb.firebaseio.com",
-    projectId: "dashboard-oficina-pro",
-    storageBucket: "dashboard-oficina-pro.firebasestorage.app",
-    messagingSenderId: "736157192887",
-    appId: "1:736157192887:web:c23d3daade848a33d67332"
-  };
+    // --- CONFIGURAÇÃO FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyB5JpYm8l0AlF5ZG3HtkyFZgmrpsUrDhv0",
+        authDomain: "dashboard-oficina-pro.firebaseapp.com",
+        databaseURL: "https://dashboard-oficina-pro-default-rtdb.firebaseio.com",
+        projectId: "dashboard-oficina-pro",
+        storageBucket: "dashboard-oficina-pro.appspot.com",
+        messagingSenderId: "736157192887",
+        appId: "1:736157192887:web:c23d3daade848a33d67332"
+    };
 
     // --- INICIALIZAÇÃO E LÓGICA ---
     document.addEventListener('DOMContentLoaded', () => {
         // --- INICIALIZAÇÃO FIREBASE ---
-        if (firebaseConfig.projectId && !firebaseConfig.databaseURL) {
-            firebaseConfig.databaseURL = `https://${firebaseConfig.projectId}.firebaseio.com`;
-        }
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -212,8 +210,8 @@
             { name: 'Gustavo', role: 'Mecânico' }, { name: 'Marcelo', role: 'Mecânico' }
         ];
         const STATUS_LIST = [
-            'Aguardando Mecânico', 'Em Análise', 'Orcamento Enviado', 'Aguardando Aprovacao',
-            'Servico Autorizado', 'Em Execucao', 'Finalizado - Aguardando Retirada', 'Entregue'
+            'Aguardando-Mecanico', 'Em-Analise', 'Orcamento-Enviado', 'Aguardando-Aprovacao',
+            'Servico-Autorizado', 'Em-Execucao', 'Finalizado-Aguardando-Retirada', 'Entregue'
         ];
 
         // --- REFERÊNCIAS DO DOM ---
@@ -279,7 +277,7 @@
         };
 
         const createCardHTML = (os) => `
-            <div class="vehicle-card" data-os-id="${os.id}">
+            <div class="vehicle-card status-${os.status}" data-os-id="${os.id}">
                 <p class="font-bold text-gray-800">${os.placa}</p>
                 <p class="text-sm text-gray-600">${os.modelo}</p>
                 <p class="text-xs text-gray-400 mt-2">Cliente: ${os.cliente}</p>
