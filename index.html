@@ -69,6 +69,7 @@
 </head>
 <body class="bg-gray-100">
 
+  <!-- User Selection Screen -->
   <div id="userScreen" class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
       <h1 class="text-3xl font-bold text-gray-800 mb-2">CHEVRON</h1>
@@ -78,6 +79,7 @@
     </div>
   </div>
 
+  <!-- Main Application -->
   <div id="app" class="hidden">
     <header class="bg-white shadow-md sticky top-0 z-40">
       <div id="attention-panel-container">
@@ -110,6 +112,7 @@
     </main>
   </div>
 
+  <!-- New/Edit OS Modal -->
   <div id="osModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="modal-content w-full max-w-lg overflow-y-auto">
       <form id="osForm" class="p-6">
@@ -134,9 +137,11 @@
     </div>
   </div>
 
+  <!-- Details Modal (Refactored Layout) -->
   <div id="detailsModal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
-    <div class="modal-content w-full max-w-4xl overflow-y-auto">
+    <div class="modal-content w-full max-w-6xl overflow-y-auto">
       <div class="p-6 sm:p-8">
+        <!-- Header Section -->
         <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
           <div class="flex justify-between items-start">
             <div>
@@ -148,8 +153,12 @@
           </div>
           <div id="responsiblesContainer" class="mt-4 pt-4 border-t text-sm text-gray-500 grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div class="lg:col-span-3">
+
+        <!-- Main Content: Two-column layout -->
+        <div class="flex flex-col lg:flex-row lg:gap-8">
+          
+          <!-- Left Column: Media and Timeline -->
+          <div class="w-full lg:w-3/5">
             <details id="media-gallery-container" class="bg-white rounded-lg shadow-sm p-4 mb-6">
               <summary class="font-bold text-xl text-gray-700 cursor-pointer">Galeria de Mídia</summary>
               <div id="thumbnail-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-4"></div>
@@ -157,46 +166,56 @@
             <h3 class="font-bold text-xl mb-4 text-gray-700">Histórico da O.S.</h3>
             <div id="timelineContainer" class="space-y-8 timeline"></div>
           </div>
-          <div class="lg:col-span-2">
-            <div class="bg-white p-4 rounded-lg shadow-sm sticky top-4">
-              <h3 class="font-bold text-xl mb-4 text-gray-700">Adicionar Atualização</h3>
-              <form id="logForm" class="space-y-4">
-                <input type="hidden" id="logOsId">
-                <textarea id="logDescricao" placeholder="Descrição do serviço, peça, observação..." rows="3" required class="p-2 border rounded w-full"></textarea>
-                <div class="flex gap-4">
-                  <input id="logPecas" type="text" placeholder="Peças (opcional)" class="p-2 border rounded w-1/2">
-                  <input id="logValor" type="number" step="0.01" placeholder="Valor R$ (opcional)" class="p-2 border rounded w-1/2">
+
+          <!-- Right Column: Actions (Sticky) -->
+          <div class="w-full lg:w-2/5 mt-8 lg:mt-0">
+            <div class="lg:sticky lg:top-4 space-y-6">
+              <div class="bg-white p-4 rounded-lg shadow-sm">
+                <h3 class="font-bold text-xl mb-4 text-gray-700">Adicionar Atualização</h3>
+                <!-- START OF FORM FIX -->
+                <form id="logForm" class="flex flex-col gap-4">
+                <!-- END OF FORM FIX -->
+                  <input type="hidden" id="logOsId">
+                  <textarea id="logDescricao" placeholder="Descrição do serviço, peça, observação..." rows="3" required class="p-2 border rounded w-full"></textarea>
+                  <div class="flex gap-4">
+                    <input id="logPecas" type="text" placeholder="Peças (opcional)" class="p-2 border rounded w-1/2">
+                    <input id="logValor" type="number" step="0.01" placeholder="Valor R$ (opcional)" class="p-2 border rounded w-1/2">
+                  </div>
+                  <div>
+                      <div class="grid grid-cols-2 gap-2">
+                          <button type="button" id="openCameraBtn" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
+                              <i class='bx bxs-camera'></i> Câmera
+                          </button>
+                          <button type="button" id="openGalleryBtn" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
+                              <i class='bx bxs-image-add'></i> Galeria
+                          </button>
+                      </div>
+                    <input id="media-input" type="file" class="hidden" multiple>
+                    <p id="fileName" class="text-sm text-gray-500 mt-1 truncate"></p>
+                  </div>
+                  <button type="submit" class="w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center justify-center gap-2">
+                    <i class='bx bx-message-square-add'></i> Adicionar ao Histórico
+                  </button>
+                </form>
+                <div id="post-log-actions" class="hidden mt-4 border-t pt-4 space-y-2">
+                  <h4 class="font-semibold text-gray-700 text-center">Registro Salvo! Mover O.S.?</h4>
+                  <button id="btn-move-next" class="w-full btn bg-blue-500 hover:bg-blue-600 text-white">Avançar Status</button>
+                  <button id="btn-move-prev" class="w-full btn bg-yellow-500 hover:bg-yellow-600 text-white">Retroceder Status</button>
+                  <button id="btn-stay" class="w-full btn bg-gray-400 hover:bg-gray-500 text-white">Apenas Atualizar</button>
                 </div>
-                <div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" id="openCameraBtn" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
-                            <i class='bx bxs-camera'></i> Câmera
-                        </button>
-                        <button type="button" id="openGalleryBtn" class="w-full btn bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 flex items-center justify-center gap-2 cursor-pointer">
-                            <i class='bx bxs-image-add'></i> Galeria
-                        </button>
-                    </div>
-                  <input id="media-input" type="file" class="hidden" multiple>
-                  <p id="fileName" class="text-sm text-gray-500 mt-1 truncate"></p>
-                </div>
-                <button type="submit" class="w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center justify-center gap-2">
-                  <i class='bx bx-message-square-add'></i> Adicionar ao Histórico
-                </button>
-              </form>
-              <div id="post-log-actions" class="hidden mt-4 border-t pt-4 space-y-2">
-                <h4 class="font-semibold text-gray-700 text-center">Registro Salvo! Mover O.S.?</h4>
-                <button id="btn-move-next" class="w-full btn bg-blue-500 hover:bg-blue-600 text-white">Avançar Status</button>
-                <button id="btn-move-prev" class="w-full btn bg-yellow-500 hover:bg-yellow-600 text-white">Retroceder Status</button>
-                <button id="btn-stay" class="w-full btn bg-gray-400 hover:bg-gray-500 text-white">Apenas Atualizar</button>
               </div>
-              <form id="kmUpdateForm" class="mt-4 border-t pt-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Atualizar KM</h4>
-                <div class="flex gap-2">
-                    <input id="updateKmInput" type="number" placeholder="Nova KM" class="p-2 border rounded w-full">
-                    <button type="submit" class="btn bg-blue-500 hover:bg-blue-600 text-white px-3" title="Salvar KM"><i class='bx bx-save'></i></button>
-                </div>
-              </form>
-              <div class="mt-6 flex justify-end">
+              
+              <div class="bg-white p-4 rounded-lg shadow-sm">
+                <form id="kmUpdateForm">
+                  <h4 class="font-semibold text-gray-700 mb-2">Atualizar KM</h4>
+                  <div class="flex gap-2">
+                      <input id="updateKmInput" type="number" placeholder="Nova KM" class="p-2 border rounded w-full">
+                      <button type="submit" class="btn bg-blue-500 hover:bg-blue-600 text-white px-3" title="Salvar KM"><i class='bx bx-save'></i></button>
+                  </div>
+                </form>
+              </div>
+
+              <div class="flex justify-end">
                 <button id="deleteOsBtn" class="btn bg-red-600 hover:bg-red-700 text-white p-2" title="Excluir O.S.">
                   <i class='bx bx-trash text-xl'></i>
                 </button>
@@ -208,6 +227,7 @@
     </div>
   </div>
   
+  <!-- Lightbox for Media -->
   <div id="lightbox" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
     <div class="absolute inset-0" id="lightbox-close-bg"></div>
     <div class="relative bg-black bg-opacity-50 p-4 rounded-lg">
@@ -222,10 +242,13 @@
   </div>
   </div>
 
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+  <!-- Application Logic -->
   <script>
+    // Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyB5JpYm8l0AlF5ZG3HtkyFZgmrpsUrDhv0",
       authDomain: "dashboard-oficina-pro.firebaseapp.com",
@@ -238,29 +261,31 @@
     
     const imgbbApiKey = "57cb1c5a02fb6e5ef2700543d6245b70";
 
+    // Simple Notification Function
     function showNotification(message, type = 'success') {
         const notification = document.createElement('div');
-        notification.id = 'notification';
-        notification.className = `notification ${type}`;
         notification.textContent = message;
+        notification.className = `fixed bottom-5 right-5 p-4 rounded-lg text-white shadow-lg transition-all duration-300 transform translate-x-full ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
         document.body.appendChild(notification);
         setTimeout(() => {
-            notification.classList.add('show');
+            notification.classList.remove('translate-x-full');
         }, 10);
         setTimeout(() => {
-            notification.classList.remove('show');
+            notification.classList.add('translate-x-full');
             setTimeout(() => {
                 if (document.body.contains(notification)) {
                     document.body.removeChild(notification);
                 }
-            }, 500);
+            }, 300);
         }, 4000);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Firebase Initialization
       firebase.initializeApp(firebaseConfig);
       const db = firebase.database();
 
+      // State Variables
       let currentUser = null;
       let allServiceOrders = {};
       let lightboxMedia = [];
@@ -268,6 +293,7 @@
       let filesToUpload = null;
       let vehiclesTriggeringAlert = new Set();
       
+      // Constants
       const USERS = [
         { name: 'Augusto', role: 'Gestor' }, { name: 'William Barbosa', role: 'Atendente' },
         { name: 'Thiago Ventura Valencio', role: 'Atendente' }, { name: 'Fernando', role: 'Mecânico' },
@@ -283,6 +309,7 @@
         'Finalizado-Aguardando-Retirada': { label: 'FINALIZADO / RETIRADA', color: 'orange', blinkClass: 'blinking-finalizado' }
       };
 
+      // DOM Elements
       const userScreen = document.getElementById('userScreen');
       const app = document.getElementById('app');
       const userList = document.getElementById('userList');
@@ -304,8 +331,10 @@
       const alertLed = document.getElementById('alert-led');
       const postLogActions = document.getElementById('post-log-actions');
 
+      // Helper Functions
       const formatStatus = (status) => status.replace(/-/g, ' ');
 
+      // Attention Panel Logic
       const updateAttentionPanel = () => {
         attentionPanel.innerHTML = Object.entries(ATTENTION_STATUSES).map(([statusKey, config]) => {
             const vehiclesInStatus = Object.values(allServiceOrders).filter(os => os.status === statusKey);
@@ -326,6 +355,7 @@
         }).join('');
       };
 
+      // User Authentication
       const loginUser = (user) => {
         currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -347,6 +377,7 @@
         }
       };
 
+      // Kanban Board Rendering
       const renderKanban = (deliveredFilter = '') => {
         const collapsedState = JSON.parse(localStorage.getItem('collapsedColumns')) || {};
         kanbanBoard.innerHTML = STATUS_LIST.map(status => {
@@ -427,6 +458,7 @@
           </div>`;
       };
 
+      // Firebase Data Listener
       const listenToServiceOrders = () => {
         db.ref('serviceOrders').on('value', snapshot => {
           allServiceOrders = snapshot.val() || {};
@@ -439,6 +471,7 @@
         });
       };
       
+      // Alert LED Logic
       const updateLedState = () => {
         if (vehiclesTriggeringAlert.size > 0 && attentionPanelContainer.classList.contains('collapsed')) {
             alertLed.classList.remove('hidden');
@@ -447,6 +480,7 @@
         }
       };
 
+      // Core OS Functions
       const updateServiceOrderStatus = (osId, newStatus) => {
         const os = allServiceOrders[osId];
         if (!os) return;
@@ -475,6 +509,7 @@
           .catch(err => showNotification("Erro ao registrar a mudança de status.", 'error'));
       };
 
+      // Modal Handling
       const openOsModal = (os = null) => {
         osForm.reset();
         document.getElementById('osId').value = os ? os.id : '';
@@ -587,6 +622,7 @@
         openLightbox(currentLightboxIndex);
       };
 
+      // Global Click Listener
       document.addEventListener('click', (e) => {
         if (e.target.closest('.user-btn')) loginUser(JSON.parse(e.target.closest('.user-btn').dataset.user));
         if (e.target.closest('.card-clickable-area')) {
@@ -632,6 +668,7 @@
         }
       });
       
+      // Form and Button Event Listeners
       addOSBtn.addEventListener('click', () => openOsModal());
       logoutButton.addEventListener('click', () => {
         localStorage.removeItem('currentUser');
@@ -816,10 +853,23 @@
       document.getElementById('lightbox-prev').addEventListener('click', () => changeLightboxItem(-1));
       document.getElementById('lightbox-next').addEventListener('click', () => changeLightboxItem(1));
       document.getElementById('lightbox-copy').addEventListener('click', () => {
-          navigator.clipboard.writeText(lightboxMedia[currentLightboxIndex].url);
-          showNotification("Link copiado!", "success");
+          // Using document.execCommand as a fallback for iframe compatibility
+          const url = lightboxMedia[currentLightboxIndex].url;
+          const textArea = document.createElement("textarea");
+          textArea.value = url;
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          try {
+            document.execCommand('copy');
+            showNotification("Link copiado!", "success");
+          } catch (err) {
+            showNotification("Falha ao copiar link.", "error");
+          }
+          document.body.removeChild(textArea);
       });
 
+      // Initial Setup
       const osResponsavelSelect = document.getElementById('osResponsavel');
       osResponsavelSelect.innerHTML = '<option value="">Selecione um responsável...</option>' + USERS.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
       checkLoggedInUser();
@@ -828,4 +878,3 @@
   </script>
 </body>
 </html>
-
