@@ -150,6 +150,10 @@
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div class="lg:col-span-3">
+            <details id="media-gallery-container" class="bg-white rounded-lg shadow-sm p-4 mb-6">
+              <summary class="font-bold text-xl text-gray-700 cursor-pointer">Galeria de Mídia</summary>
+              <div id="thumbnail-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-4"></div>
+            </details>
             <h3 class="font-bold text-xl mb-4 text-gray-700">Histórico da O.S.</h3>
             <div id="timelineContainer" class="space-y-8 timeline"></div>
           </div>
@@ -494,6 +498,8 @@
         document.getElementById('detailsKm').textContent = `KM: ${os.km ? new Intl.NumberFormat('pt-BR').format(os.km) : 'Não informado'}`;
         document.getElementById('logOsId').value = os.id;
         document.getElementById('updateKmInput').value = os.km || '';
+        postLogActions.classList.add('hidden');
+        logForm.style.display = 'flex';
         
         const responsiblesContainer = document.getElementById('responsiblesContainer');
         responsiblesContainer.innerHTML = `
@@ -605,6 +611,25 @@
             collapsedState[status] = list.classList.contains('collapsed');
             localStorage.setItem('collapsedColumns', JSON.stringify(collapsedState));
         }
+        if(e.target.closest('.attention-vehicle')) {
+            const osId = e.target.closest('.attention-vehicle').dataset.osId;
+            const os = allServiceOrders[osId];
+            if(!os) return;
+            
+            const allowedRoles = ['Gestor', 'Atendente'];
+            if (allowedRoles.includes(currentUser.role)) {
+                const logEntry = {
+                    type: 'log',
+                    description: `Alerta de status (${formatStatus(os.status)}) visualizado.`,
+                    user: currentUser.name,
+                    timestamp: new Date().toISOString()
+                };
+                db.ref(`serviceOrders/${osId}/timeline`).push(logEntry);
+            }
+            vehiclesTriggeringAlert.delete(osId);
+            updateLedState();
+            renderDetailsModal(os);
+        }
       });
       
       addOSBtn.addEventListener('click', () => openOsModal());
@@ -690,12 +715,25 @@
         db.ref(`serviceOrders/${osId}/timeline`).push(logEntry)
           .then(() => {
             showNotification("Registro adicionado ao histórico!");
+            logForm.style.display = 'none';
+            postLogActions.classList.remove('hidden');
+            const os = allServiceOrders[osId];
+            const currentIndex = STATUS_LIST.indexOf(os.status);
+            document.getElementById('btn-move-next').onclick = () => {
+                if(currentIndex < STATUS_LIST.length - 1) updateServiceOrderStatus(osId, STATUS_LIST[currentIndex + 1]);
+                detailsModal.classList.add('hidden');
+            };
+            document.getElementById('btn-move-prev').onclick = () => {
+                if(currentIndex > 0) updateServiceOrderStatus(osId, STATUS_LIST[currentIndex - 1]);
+                detailsModal.classList.add('hidden');
+            };
+            document.getElementById('btn-stay').onclick = () => {
+                detailsModal.classList.add('hidden');
+            };
+            
             logForm.reset();
             document.getElementById('fileName').textContent = '';
             filesToUpload = null;
-            if (allServiceOrders[osId]) {
-              db.ref(`serviceOrders/${osId}`).once('value', snapshot => renderDetailsModal(snapshot.val()));
-            }
           })
           .catch(err => showNotification("Erro ao salvar registro.", 'error'))
           .finally(() => {
