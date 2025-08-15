@@ -146,6 +146,10 @@
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div class="lg:col-span-3">
+            <details id="media-gallery-container" class="bg-white rounded-lg shadow-sm p-4 mb-6">
+              <summary class="font-bold text-xl text-gray-700 cursor-pointer">Galeria de Mídia</summary>
+              <div id="thumbnail-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-4"></div>
+            </details>
             <h3 class="font-bold text-xl mb-4 text-gray-700">Histórico da O.S.</h3>
             <div id="timelineContainer" class="space-y-8 timeline"></div>
           </div>
@@ -223,23 +227,6 @@
     };
     
     const imgbbApiKey = "57cb1c5a02fb6e5ef2700543d6245b70";
-
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.id = 'notification';
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 500);
-        }, 4000);
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
       firebase.initializeApp(firebaseConfig);
@@ -575,16 +562,6 @@
         }
         if (e.target.closest('.thumbnail-item')) {
             openLightbox(parseInt(e.target.closest('.thumbnail-item').dataset.index));
-        }
-        if (e.target.closest('.toggle-column-btn')) {
-            const status = e.target.closest('.toggle-column-btn').dataset.status;
-            const list = document.querySelector(`.vehicle-list[data-status="${status}"]`);
-            const icon = e.target.closest('.toggle-column-btn').querySelector('i');
-            list.classList.toggle('collapsed');
-            icon.classList.toggle('rotate-180');
-            const collapsedState = JSON.parse(localStorage.getItem('collapsedColumns')) || {};
-            collapsedState[status] = list.classList.contains('collapsed');
-            localStorage.setItem('collapsedColumns', JSON.stringify(collapsedState));
         }
       });
       
