@@ -9,14 +9,15 @@
   <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <style>
     body { font-family: 'Roboto', sans-serif; background-color: #f0f2f5; }
-    .status-column { background: #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; }
-    .vehicle-list { flex-grow: 1; }
+    .status-column { background: #e2e8f0; border-radius: 12px; display: flex; flex-direction: column; transition: all 0.3s ease; }
+    .vehicle-list { flex-grow: 1; transition: all 0.3s ease-in-out; max-height: 1000px; overflow: hidden; }
+    .vehicle-list.collapsed { max-height: 0; margin-top: 0 !important; }
     .vehicle-card {
-      background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      background: white; border-radius: 8px; padding: 8px; margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       transition: all 0.2s ease-in-out; border-left: 5px solid;
     }
-    .vehicle-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1); }
+    .vehicle-card:hover { transform: translateY(-3px); box-shadow: 0 8px 12px rgba(0,0,0,0.1); }
     .vehicle-card.status-Aguardando-Mecanico { border-left-color: #f59e0b; }
     .vehicle-card.status-Em-Analise { border-left-color: #8b5cf6; }
     .vehicle-card.status-Orcamento-Enviado { border-left-color: #06b6d4; }
@@ -55,11 +56,15 @@
     }
     #lightbox img, #lightbox video { max-height: 80vh; max-width: 80vw; }
     #alert-led {
-        width: 12px; height: 12px; background-color: #ef4444;
-        border-radius: 50%; box-shadow: 0 0 8px #ef4444, inset 0 0 3px white;
+        width: 16px; height: 16px; background-color: #ef4444;
+        border-radius: 50%; box-shadow: 0 0 12px #ef4444, inset 0 0 4px white;
         animation: blink-led 1s infinite;
     }
     @keyframes blink-led { 50% { opacity: 0.2; } }
+    .column-led {
+        width: 8px; height: 8px; background-color: #22c55e;
+        border-radius: 50%; box-shadow: 0 0 5px #22c55e;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -145,10 +150,6 @@
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div class="lg:col-span-3">
-            <details id="media-gallery-container" class="bg-white rounded-lg shadow-sm p-4 mb-6">
-              <summary class="font-bold text-xl text-gray-700 cursor-pointer">Galeria de Mídia</summary>
-              <div id="thumbnail-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-4"></div>
-            </details>
             <h3 class="font-bold text-xl mb-4 text-gray-700">Histórico da O.S.</h3>
             <div id="timelineContainer" class="space-y-8 timeline"></div>
           </div>
@@ -178,6 +179,12 @@
                   <i class='bx bx-message-square-add'></i> Adicionar ao Histórico
                 </button>
               </form>
+              <div id="post-log-actions" class="hidden mt-4 border-t pt-4 space-y-2">
+                <h4 class="font-semibold text-gray-700 text-center">Registro Salvo! Mover O.S.?</h4>
+                <button id="btn-move-next" class="w-full btn bg-blue-500 hover:bg-blue-600 text-white">Avançar Status</button>
+                <button id="btn-move-prev" class="w-full btn bg-yellow-500 hover:bg-yellow-600 text-white">Retroceder Status</button>
+                <button id="btn-stay" class="w-full btn bg-gray-400 hover:bg-gray-500 text-white">Apenas Atualizar</button>
+              </div>
               <form id="kmUpdateForm" class="mt-4 border-t pt-4">
                 <h4 class="font-semibold text-gray-700 mb-2">Atualizar KM</h4>
                 <div class="flex gap-2">
@@ -227,6 +234,25 @@
     
     const imgbbApiKey = "57cb1c5a02fb6e5ef2700543d6245b70";
 
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.id = 'notification';
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 500);
+        }, 4000);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       firebase.initializeApp(firebaseConfig);
       const db = firebase.database();
@@ -236,6 +262,7 @@
       let lightboxMedia = [];
       let currentLightboxIndex = 0;
       let filesToUpload = null;
+      let vehiclesTriggeringAlert = new Set();
       
       const USERS = [
         { name: 'Augusto', role: 'Gestor' }, { name: 'William Barbosa', role: 'Atendente' },
@@ -271,6 +298,7 @@
       const openCameraBtn = document.getElementById('openCameraBtn');
       const openGalleryBtn = document.getElementById('openGalleryBtn');
       const alertLed = document.getElementById('alert-led');
+      const postLogActions = document.getElementById('post-log-actions');
 
       const formatStatus = (status) => status.replace(/-/g, ' ');
 
@@ -280,11 +308,11 @@
             const hasVehicles = vehiclesInStatus.length > 0;
             const blinkingClass = hasVehicles ? config.blinkClass : '';
             const vehicleListHTML = hasVehicles 
-                ? vehiclesInStatus.map(os => `<p>${os.placa} - ${os.modelo}</p>`).join('')
+                ? vehiclesInStatus.map(os => `<p class="cursor-pointer attention-vehicle" data-os-id="${os.id}">${os.placa} - ${os.modelo}</p>`).join('')
                 : `<p class="text-gray-600">- Vazio -</p>`;
 
             return `
-                <div class="attention-box p-2 rounded-md bg-gray-800 border-2 border-gray-700 ${blinkingClass}">
+                <div class="attention-box p-2 rounded-md bg-gray-800 border-2 border-gray-700 ${blinkingClass}" data-status-key="${statusKey}">
                     <h3 class="text-center text-${config.color}-400 font-bold text-xs sm:text-sm truncate">${config.label}</h3>
                     <div class="mt-1 text-center text-white text-xs space-y-1 h-16 overflow-y-auto">
                         ${vehicleListHTML}
@@ -316,17 +344,28 @@
       };
 
       const renderKanban = (deliveredFilter = '') => {
+        const collapsedState = JSON.parse(localStorage.getItem('collapsedColumns')) || {};
         kanbanBoard.innerHTML = STATUS_LIST.map(status => {
+          const isCollapsed = collapsedState[status];
           const isDeliveredColumn = status === 'Entregue';
           const searchInputHTML = isDeliveredColumn ? `
             <input type="search" id="searchDeliveredInput" placeholder="Buscar em Entregues..." 
                    class="w-full p-2 mb-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
           ` : '';
+          const hasVehicles = Object.values(allServiceOrders).some(os => os.status === status);
+          const columnLedHTML = isCollapsed && hasVehicles ? `<div class="column-led ml-2"></div>` : '';
+
           return `
             <div class="status-column p-3">
-              <h3 class="font-bold text-gray-700 mb-3 px-1">${formatStatus(status)}</h3>
+              <div class="flex justify-between items-center cursor-pointer toggle-column-btn" data-status="${status}">
+                <div class="flex items-center">
+                  <h3 class="font-bold text-gray-700 px-1">${formatStatus(status)}</h3>
+                  ${columnLedHTML}
+                </div>
+                <i class='bx bxs-chevron-down transition-transform ${isCollapsed ? 'rotate-180' : ''}'></i>
+              </div>
               ${searchInputHTML}
-              <div class="space-y-3 vehicle-list" data-status="${status}"></div>
+              <div class="space-y-3 mt-3 vehicle-list ${isCollapsed ? 'collapsed' : ''}" data-status="${status}"></div>
             </div>`;
         }).join('');
 
@@ -355,29 +394,31 @@
         const currentIndex = STATUS_LIST.indexOf(os.status);
         const prevStatus = currentIndex > 0 ? STATUS_LIST[currentIndex - 1] : null;
         const nextStatus = currentIndex < STATUS_LIST.length - 1 ? STATUS_LIST[currentIndex + 1] : null;
-        const prevButton = prevStatus ? `<button data-os-id="${os.id}" data-new-status="${prevStatus}" class="btn-move-status p-1 rounded-full hover:bg-gray-200"><i class='bx bx-chevron-left text-2xl text-gray-600'></i></button>` : `<div class="w-8 h-8"></div>`;
-        const nextButton = nextStatus ? `<button data-os-id="${os.id}" data-new-status="${nextStatus}" class="btn-move-status p-1 rounded-full hover:bg-gray-200"><i class='bx bx-chevron-right text-2xl text-gray-600'></i></button>` : `<div class="w-8 h-8"></div>`;
+        const prevButton = prevStatus ? `<button data-os-id="${os.id}" data-new-status="${prevStatus}" class="btn-move-status p-2 rounded-full hover:bg-gray-200"><i class='bx bx-chevron-left text-2xl text-gray-600'></i></button>` : `<div class="w-10 h-10"></div>`;
+        const nextButton = nextStatus ? `<button data-os-id="${os.id}" data-new-status="${nextStatus}" class="btn-move-status p-2 rounded-full hover:bg-gray-200"><i class='bx bx-chevron-right text-2xl text-gray-600'></i></button>` : `<div class="w-10 h-10"></div>`;
 
-        let responsibleInfo = `<p class="text-xs text-gray-400 mt-1">Resp.: ${os.responsible}</p>`;
+        let responsibleInfo = `<p class="text-xs text-gray-400">Resp.: ${os.responsible}</p>`;
         if (os.status === 'Em-Execucao' && os.responsibleForService) {
-            responsibleInfo = `<p class="text-xs text-red-500 font-semibold mt-1">Mec.: ${os.responsibleForService}</p>`;
+            responsibleInfo = `<p class="text-xs text-red-500 font-semibold">Mec.: ${os.responsibleForService}</p>`;
         } else if (os.status === 'Em-Analise' && os.responsibleForBudget) {
-            responsibleInfo = `<p class="text-xs text-purple-500 font-semibold mt-1">Orçam.: ${os.responsibleForBudget}</p>`;
+            responsibleInfo = `<p class="text-xs text-purple-500 font-semibold">Orçam.: ${os.responsibleForBudget}</p>`;
         }
         
-        const kmInfo = `<p class="text-xs text-gray-500 mt-1">KM: ${os.km ? new Intl.NumberFormat('pt-BR').format(os.km) : 'N/A'}</p>`;
+        const kmInfo = `<p class="text-xs text-gray-500">KM: ${os.km ? new Intl.NumberFormat('pt-BR').format(os.km) : 'N/A'}</p>`;
 
         return `
           <div class="vehicle-card status-${os.status}" data-os-id="${os.id}">
-            <div class="card-clickable-area cursor-pointer">
-              <p class="font-bold text-gray-800">${os.placa}</p>
-              <p class="text-sm text-gray-600">${os.modelo}</p>
-              ${kmInfo}
-              ${responsibleInfo}
-            </div>
-            <div class="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-              ${prevButton}
-              ${nextButton}
+            <div class="flex justify-between items-start">
+                <div class="card-clickable-area cursor-pointer flex-grow">
+                  <p class="font-bold text-sm text-gray-800">${os.placa}</p>
+                  <p class="text-xs text-gray-600">${os.modelo}</p>
+                  <div class="text-xs mt-1">${kmInfo}</div>
+                  <div class="text-xs">${responsibleInfo}</div>
+                </div>
+                <div class="flex flex-col -mt-1 -mr-1">
+                    ${nextButton}
+                    ${prevButton}
+                </div>
             </div>
           </div>`;
       };
@@ -393,6 +434,14 @@
           showNotification("Erro de conexão com o banco de dados.", 'error');
         });
       };
+      
+      const updateLedState = () => {
+        if (vehiclesTriggeringAlert.size > 0 && attentionPanelContainer.classList.contains('collapsed')) {
+            alertLed.classList.remove('hidden');
+        } else {
+            alertLed.classList.add('hidden');
+        }
+      };
 
       const updateServiceOrderStatus = (osId, newStatus) => {
         const os = allServiceOrders[osId];
@@ -406,6 +455,12 @@
 
         db.ref(`serviceOrders/${osId}`).update(updates);
         
+        vehiclesTriggeringAlert.delete(osId);
+        if (Object.keys(ATTENTION_STATUSES).includes(newStatus)) {
+            vehiclesTriggeringAlert.add(osId);
+        }
+        updateLedState();
+        
         const logEntry = {
           type: 'status',
           description: `Status alterado para: ${formatStatus(newStatus)}`,
@@ -413,11 +468,6 @@
           timestamp: new Date().toISOString()
         };
         db.ref(`serviceOrders/${osId}/timeline`).push(logEntry)
-          .then(() => {
-              if (Object.keys(ATTENTION_STATUSES).includes(newStatus) && attentionPanelContainer.classList.contains('collapsed')) {
-                  alertLed.classList.remove('hidden');
-              }
-          })
           .catch(err => showNotification("Erro ao registrar a mudança de status.", 'error'));
       };
 
@@ -544,6 +594,16 @@
         }
         if (e.target.closest('.thumbnail-item')) {
             openLightbox(parseInt(e.target.closest('.thumbnail-item').dataset.index));
+        }
+        if (e.target.closest('.toggle-column-btn')) {
+            const status = e.target.closest('.toggle-column-btn').dataset.status;
+            const list = document.querySelector(`.vehicle-list[data-status="${status}"]`);
+            const icon = e.target.closest('.toggle-column-btn').querySelector('i');
+            list.classList.toggle('collapsed');
+            icon.classList.toggle('rotate-180');
+            const collapsedState = JSON.parse(localStorage.getItem('collapsedColumns')) || {};
+            collapsedState[status] = list.classList.contains('collapsed');
+            localStorage.setItem('collapsedColumns', JSON.stringify(collapsedState));
         }
       });
       
@@ -708,7 +768,8 @@
         icon.classList.toggle('bxs-chevron-up');
         icon.classList.toggle('bxs-chevron-down');
         if (!container.classList.contains('collapsed')) {
-            alertLed.classList.add('hidden');
+            vehiclesTriggeringAlert.clear();
+            updateLedState();
         }
       });
 
